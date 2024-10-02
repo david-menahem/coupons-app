@@ -1,0 +1,47 @@
+version: "3.9"
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-container
+    environment:
+      MYSQL_DATABASE: coupons
+      MYSQL_USER: dvmena
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - mynetwork
+
+  java-app:
+    build: ./coupons
+    container_name: coupons-app-container
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/coupons
+      SPRING_DATASOURCE_USERNAME: dvmena
+      SPRING_DATASOURCE_PASSWORD: 1234
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    networks:
+      - mynetwork
+
+  react-app:
+    build: ./coupons-site
+    container_name: coupons-site-container
+    ports:
+      - '3000:3000'
+    stdin_open: true
+    tty: true
+    networks:
+      - mynetwork
+
+volumes:
+  mysql-data:
+
+networks:
+  mynetwork:
+    driver: bridge
